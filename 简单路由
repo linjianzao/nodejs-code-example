@@ -1,0 +1,33 @@
+var http = require("http");
+var circle = require("./controller/circle.js");
+var index = require("./controller/index.js");
+
+http.createServer(function(req, res){
+	var url = require('url');
+	var pathname = url.parse(req.url).pathname;
+	var paths = pathname.split("/");
+	var controller = paths[1] || "index";
+	var action = paths[2] || "index";
+	try{
+		var route =  require("./controller/"+controller+".js");
+		route[action](req, res);
+	}catch(err){
+		res.writeHead(200,{'Content-Type': 'text/plain;charset=UTF-8'});
+		console.log("路由不存在");
+		res.end('路由不存在');
+	}
+	console.log("服务器启动成功");
+}).listen(3003);
+
+访问：
+http://localhost:3003/index/ad
+http://localhost:3003/
+
+如果是http://localhost:3003/index/ad/a/v
+这种多层的，可以 
+var args = paths.slice(3);
+从第三个开始分割，这样就可以循环取到了
+
+
+express的做法是，先定义一个维护所有路由的数组，然后取URL的路径，然后用key对应
+这个不好的地方就是要手动写所有路由规则，但是速度会比较快，毕竟都在内存跑
