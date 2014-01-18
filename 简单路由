@@ -31,3 +31,9 @@ var args = paths.slice(3);
 
 express的做法是，先定义一个维护所有路由的数组，然后取URL的路径，然后用key对应
 这个不好的地方就是要手动写所有路由规则，但是速度会比较快，毕竟都在内存跑
+
+
+截取url  ? 后面的参数
+var url = require("url");
+var querystring = require("querystring");
+var urlQuery = querystring.parse(url.parse(req.url).query);
