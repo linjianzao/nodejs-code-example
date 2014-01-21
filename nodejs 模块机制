@@ -38,3 +38,38 @@ require如果没有找到对应文件而得到一个目录的话，node会将包
 
 
 模块编译:
+.js文件：通过fs模块同步读取文件后编译执行
+.node文件：通过C/C++编写的扩展文件，通过dlopen()方法加载最后编译生成的文件
+.json文件：通过fs模块同步读取文件后，用JSON.parse()解析返回结果
+其余扩展名文件都被当.js文件载入
+每一次编译成的模块都会将其文件路径作为索引缓存在Module._cache对象上。
+如果想对自定义的扩展名进行特殊的加载，可以通过类似require.extensions['.ext'] 方式实现，就是可以自己写怎么加载
+官方的建议是编译成JS文件加载
+
+
+
+exports 和module.exports
+
+bar文件:
+  exports.change = function(a){
+  	a = 100;
+  	console.log(a);
+  };//会报错
+
+module.exports = function(a){
+	a = 100;
+	console.log(a);
+};//不会报错
+
+
+用C/C++模块编译的比较快
+
+
+json文件编译：
+最简单的，而且你require一个JSON配置文件，可以直接使用
+
+
+
+核心模块：
+分C/C++编写 和js编写两部分，C/C++编写存在 node项目下的src，js文件存在lib
+
