@@ -36,3 +36,11 @@ node模块分两种：核心模块和用户编写的模块（文件模块）
 自定义模块是最慢的
 自定义模块的查找方式：从本目录的node_modules开始往上找 直到根目录的node_modules，
 所以一般如果不是全局的 会在本目录加依赖,package.json
+
+文件模块加载： 按.js .node .json 顺序查找,可以给require的文件加扩展名
+
+
+目录分析和包：
+require如果没有找到对应文件而得到一个目录的话，node会将包当做一个包来处理
+首先node会目录下的 package.json，通过json.parse解析包描述的对象，然后取出main属性指定的文件名进行定位，
+如果文件不存在或者没有package.json，node会将index当作默认文件名，会依次查找index.js 、index.node、index.json
