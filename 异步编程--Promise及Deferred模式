@@ -1,0 +1,5 @@
+发布/订阅模式下执行流程需要被预先设定
+Promise/Deferred模式是先执行异步调用，延迟传递处理。
+CommonJS规范中抽象出（Promise/A 、Promise/B、Promise/D）
+这边主要介绍Promise/A 。
+
