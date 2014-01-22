@@ -1,0 +1,53 @@
+node提供events模块简单实现 事件发布/订阅模式
+
+//模拟post请求数据
+var http = require("http");
+var options = {
+  host:"www.google.com",
+  port:80,
+  path:"/upload",
+  method:"POST"
+};
+	
+var req = http.request(options,function(res){
+	res.setEncoding("utf8");
+	res.on("data",function(chunk){
+		console.log(chunk);
+	});
+	res.on("end",function(){
+	});
+});
+req.on("error",function(e){
+	console.log(e.message);
+});
+req.write("data\n");
+req.write("data\n");
+req.end();
+
+
+超过10个侦听器会得到警告，可以用emitter.setMaxListeners(0)去掉限制。
+健壮的实例应该对error事件做处理。
+
+
+过滤重复事件响应
+var events = require("events");
+var proxy = new events.EventEmitter();
+var status = "ready";
+var select = function(callback){
+	if (status == "ready"){
+		status = "pending";
+		db.select("SQL",function(results){
+			proxy.emit("selected",results);
+			status = "ready";
+		});
+	}
+};
+
+利用once()方法将所有的回调压入事件队列，利用其执行一次就会将监视器移除的特点，保证每一个回调只会被执行一次。
+
+
+多异步的协作：
+利用偏函数处理哨兵变量和第三方函数关系
+未完。。。。。。。。。。。。。。。
+
+
