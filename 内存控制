@@ -1,0 +1,7 @@
+node启动参数加 --prof 在目录下生成 v8.log
+node源码里的deps/v8/tools 下找到linux-tick-processor工具来分析日志
+运行: $ linux-tick-processor v8.log
+查看结果
+
+
+触发垃圾回收：
