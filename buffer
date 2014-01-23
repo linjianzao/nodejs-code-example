@@ -1,0 +1,104 @@
+buffer对象类似数组，元素为16进制的两位数，即0到255的数值
+
+var str="深入浅出nodejs";
+var buf = new Buffer(str,"utf-8");
+console.log(buf);
+console.log(buf.length);//长度18.UTF8下中文字母三个元素，字母和半角标点符号1个元素
+
+
+var buf = new Buffer(100);
+console.log(buf[10]);//可以通过下标访问，如果没有赋值则是0到255之间的随机值
+buf[10] = 100;//通过下标赋值
+buf[20] = -100;
+//结果是156,如果赋值的元素不是0到255,小于0的每次加256直到处于区间，大于255的每次减256直到处于区间，如果是小数舍弃小数部分
+console.log(buf[20]);
+
+
+buffer使用内存是在C++层面申请内存，在js中分配内存的。node采用slab分配机制
+
+buffer转字符串
+buf.toString([encoding],[start],[end])
+
+
+Buffer.isEncoding(encoding)//判断是否支持转换
+国内的GBK、GB2312、BIG-5都不支持
+
+
+iconv 和iconv-lite 提供更多的类型转换
+iconv-lite纯js实现，iconv是通过C++调用libiconv库。
+性能方面，转码都是耗用CPU，在V8的高性能，少了C++到JS层面的转换，所以iconv-lite比iconv实现得更好
+
+var iconv = require("iconv-lite");
+var buf = iconv.encode("asdasd asd ad ","win1251");
+var str = iconv.decode(buf,"win1251");
+console.log(buf);
+console.log(str);
+
+
+//乱码问题
+var fs = require("fs");
+var rs = fs.createReadStream("file.txt",{highWaterMark:11});//这边指定每次读取的长度,这边是构造11,但是因为是慢慢读流的，所以任何长度都有可能导致宽字节乱码
+var data = "";
+rs.on("data",function(chunk){
+	data += chunk;//这边因为中文的原因，占用字节不一样，可能会被刚好截断导致乱码
+});
+rs.on("end",function(){
+	console.log(data);//然后结果里就有乱码了
+});
+
+
+//解决乱码的办法之一
+rs.setEncoding("utf8");//如果不加这句就乱码，加这句data传递的就是字符串而不是buffer，但是由于底层不能处理所有的编码，所以还是不能从根本上解决问题
+
+
+//根本解决办法
+var chunks=[];
+var size=0;
+var fs = require("fs");
+var iconv = require("iconv-lite");
+var rs = fs.createReadStream("file.txt",{highWaterMark:11});
+rs.on("data",function(chunk){
+	chunks.push(chunk);
+	size += chunk.length;//记录长度
+});
+rs.on("end",function(){
+	var buf = Buffer.concat(chunks,size);//使用Buffer.concat合并Buffer对象
+	var str = iconv.decode(buf,"utf8");
+	console.log(str);
+});
+
+
+
+//buffer性能测试
+//输出网络传输的时候转为 buffer节省性能
+var http  = require("http");
+var helloworld = "";
+for(var i=0;i<1024*10;i++){
+	helloworld += "a";
+}
+//helloworld = new Buffer(helloworld); //注释和不注释然后用ab模拟访问看性能
+http.createServer(function(req,res){
+	res.writeHead(200);
+	res.end(helloworld);
+}).listen(8001);
+
+
+//ab模拟
+$ ab -c 200 -t 100 http://localhost:8001/
+
+有helloworld = new Buffer(helloworld); 
+Time taken for tests:   7.320 seconds
+
+
+没有helloworld = new Buffer(helloworld); 
+Time taken for tests:   9.935 seconds
+
+
+文件等等读取的时候，一般第二个参数会有很多选项，详细了解可以调优
+highWaterMark的设置和读取速度有关，因为是每次读取的长度
+
+
+
+
+
+
