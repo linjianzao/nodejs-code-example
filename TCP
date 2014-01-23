@@ -1,0 +1,17 @@
+node 的net模块处理 TCP
+
+var net = require("net");
+//var server = net.createServer(function(socket){
+var server = net.createServer("connection",function(socket){
+	socket.on("data",function(){
+		socket.write("hello ");
+	});
+	socket.on("end",function(){
+		console.log("断开");
+	});
+	socket.write("深入浅出");
+}).listen("8124",function(){
+	console.log("边界");
+});
+
+只是写个列子详细查看文档的详细参数说明
